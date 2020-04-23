@@ -7,7 +7,7 @@
     <parent>
         <groupId>io.confluent</groupId>
         <artifactId>kafka-schema-registry-parent</artifactId>
-        <version>6.0.0-beta200608020919</version>
+        <version>6.0.0-0</version>
     </parent>
 
     <licenses>
@@ -40,14 +40,17 @@
         <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-avro-serializer</artifactId>
+            <version>${io.confluent.schema-registry.version}</version>
         </dependency>
         <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-schema-registry-client</artifactId>
+            <version>${io.confluent.schema-registry.version}</version>
         </dependency>
         <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-connect-avro-data</artifactId>
+            <version>${io.confluent.schema-registry.version}</version>
         </dependency>
 
         <dependency>
@@ -95,6 +98,7 @@
 
                             <dockerNamespace>confluentinc</dockerNamespace>
                             <dockerName>cp-kafka-connect</dockerName>
+                            <!-- TODO: follow up on this as this version probably doesn't work anymore, need to know what is trying to be done here. -->
                             <dockerTag>${project.version}</dockerTag>
                             
                             <componentTypes>
