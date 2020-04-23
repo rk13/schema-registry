@@ -1,5 +1,10 @@
 #!/usr/bin/env groovy
 common {
-  slackChannel = '#schema-registry-eng'
-  upstreamProjects = 'confluentinc/rest-utils'
+  slackChannel = ''
+  testbreakReporting = false
+  downStreamRepos = ["secret-registry", "kafka-rest", "ksql",
+    "confluent-security-plugins", "kafka-connect-replicator",
+    "ce-kafka-rest", "confluent-cloud-plugins"]
+  disableConcurrentBuilds = true
+  nanoVersion = true
 }
