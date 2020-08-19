@@ -22,7 +22,6 @@ import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.specific.SpecificData;
-import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.errors.SerializationException;
 
@@ -39,6 +38,7 @@ public abstract class AbstractKafkaAvroDeserializer extends AbstractKafkaAvroSer
   private final DecoderFactory decoderFactory = DecoderFactory.get();
   protected boolean useSpecificAvroReader = false;
   private final Map<String, Schema> readerSchemaCache = new ConcurrentHashMap<String, Schema>();
+  private final Map<SchemaPair, DatumReader<?>> datumReaderCache = new ConcurrentHashMap<>();
 
   /**
    * Sets properties for this deserializer without overriding the schema registry client itself.
@@ -206,21 +206,17 @@ public abstract class AbstractKafkaAvroDeserializer extends AbstractKafkaAvroSer
     return (GenericContainerWithVersion) deserialize(true, topic, isKey, payload, null);
   }
 
-  private DatumReader getDatumReader(Schema writerSchema, Schema readerSchema) {
-    boolean writerSchemaIsPrimitive =
-        AvroSchemaUtils.getPrimitiveSchemas().values().contains(writerSchema);
-    // do not use SpecificDatumReader if writerSchema is a primitive
-    if (useSpecificAvroReader && !writerSchemaIsPrimitive) {
-      if (readerSchema == null) {
-        readerSchema = getReaderSchema(writerSchema);
-      }
-      return new SpecificDatumReader(writerSchema, readerSchema);
-    } else {
+  private DatumReader getDatumReader(Schema writerSchema, final Schema readerSchema) {
+    SchemaPair cacheKey = new SchemaPair(writerSchema, readerSchema);
+
+    return datumReaderCache.computeIfAbsent(cacheKey, schema -> {
+      boolean writerSchemaIsPrimitive =
+              AvroSchemaUtils.getPrimitiveSchemas().values().contains(writerSchema);
       if (readerSchema == null) {
         return new GenericDatumReader(writerSchema);
       }
       return new GenericDatumReader(writerSchema, readerSchema);
-    }
+    });
   }
 
   @SuppressWarnings("unchecked")
